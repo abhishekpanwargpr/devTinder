@@ -1,0 +1,20 @@
+{
+  "name": "dev_tinder",
+  "version": "1.0.0",
+  "description": "Dev_Tinder a social media app for developers to interact and collab with each other",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "devop": "nodemon src/app.js"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "javascript"
+  ],
+  "author": "Abhishek Panwar",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
