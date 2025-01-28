@@ -80,11 +80,21 @@ app.delete("user", async (req, res)=>{
 app.patch("/user", async (req, res)=>{
     const userId = req.body.userId;
     try {
-        const user = await User.findByIdAndUpdate(userId, req.body);
+        const user = await User.findByIdAndUpdate(userId, req.body, {returnDocument: "after"});
         console.log(user);
         res.send("User profile updated successfully...")
     } catch (err) {
         res.status(500).send("Something went wrong!")
+    }
+})
+
+app.patch("/userId", async (req, res)=>{
+    const userEMail = req.body.emailId;
+    try {
+        const user = await User.findOneAndUpdate({emailId: userEMail}, req.body);
+        res.send("User profile updated succesfully...");
+    } catch (err) {
+        res.status(500).send("Sonething went wrong!");
     }
 })
 // app.use("/getUser", (req,res)=>{
