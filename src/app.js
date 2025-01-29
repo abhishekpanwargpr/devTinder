@@ -4,7 +4,9 @@ const validator = require('validator')
 const app = express()
 const connectDb = require("./configs/database")
 const User = require("./models/user")
-const {validateSignUp} = require('./utils/validateSignUp')
+const {validateSignUp} = require('./utils/validateSignUp');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken')
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
@@ -15,6 +17,7 @@ connectDb()
         console.log("Error while connecting!")
     })
 app.use("/", express.json());
+app.use(cookieParser());
 app.post("/signUp",async (req, res)=>{
     // console.log(req.body);
     const {firstName, lastName, emailId, password} = req.body
@@ -52,11 +55,31 @@ app.post("/login", async (req, res)=>{
             throw new Error("Password not matched")
         }
         else{
+            const token = await jwt.sign({_id: user._id}, "Devop@Namaste123")
+            res.cookie("token", token);
             res.send("Login successfull!");
         }
     } catch (err) {
         res.status(500).send("Error: "+err.message)
     }
+})
+app.get("/profile", async (req, res)=>{
+
+    try {
+        const {token} = req.cookies;
+        if(!token){
+            throw new Error("Invalid token please login again")
+        }
+        const decodedMessage = await jwt.verify(token, "Devop@Namaste123");
+        const {_id} = decodedMessage;
+        const user = await User.findById(_id);
+        if(!user){
+            throw new Error("No user found")
+        }
+        res.send(user);
+    } catch (err) {
+        res.send("Error: "+err.message)
+    }    
 })
 app.get("/user", async (req,res)=>{
     const userEmail = req.body.emailId;
