@@ -1,7 +1,10 @@
 const express = require('express')
+const bcrypt = require('bcrypt');
+const validator = require('validator')
 const app = express()
 const connectDb = require("./configs/database")
 const User = require("./models/user")
+const {validateSignUp} = require('./utils/validateSignUp')
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
@@ -13,21 +16,21 @@ connectDb()
     })
 app.use("/", express.json());
 app.post("/signUp",async (req, res)=>{
-    // const userDummy = {firstName: "Abhishek", 
-    //                    lastName: "Panwar",
-    //                    emailId: "apnwr1046@gmail.com",
-    //                    password: "Abhip1234",
-    //                    phone : 34919373893,
-    //                    age: 21,
-    //                    gender: "Male"
-                       
-    // }
     // console.log(req.body);
-    const user = new User(req.body);
+    const {firstName, lastName, emailId, password} = req.body
     try {
         // if(req.body.skills.length > 10){
         //     throw new Error("Too much skills passed!")
         // }
+        //Validate the data
+        validateSignUp(req);
+        const password = req.body.password;
+        //Encrypt the password
+        const passwordHash = await bcrypt.hash(password, 10);
+        console.log(passwordHash);
+    const user = new User({
+        firstName, lastName, emailId, password: passwordHash
+    })
         await user.save();
         res.send("Succesfully added user");  
     } catch (error) {
@@ -35,6 +38,26 @@ app.post("/signUp",async (req, res)=>{
     }
 })
 
+app.post("/login", async (req, res)=>{
+    const {emailId, password} = req.body;
+    
+    try {
+        if(!validator.isEmail(emailId)){
+            throw new Error("Invalid credentials entered!");
+        }
+        const user = await User.findOne({emailId: emailId})
+        const isValidPassword = bcrypt.compare(password, user.password);
+
+        if(!isValidPassword){
+            throw new Error("Password not matched")
+        }
+        else{
+            res.send("Login successfull!");
+        }
+    } catch (err) {
+        res.status(500).send("Error: "+err.message)
+    }
+})
 app.get("/user", async (req,res)=>{
     const userEmail = req.body.emailId;
     try {
