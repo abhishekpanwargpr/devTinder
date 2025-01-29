@@ -25,6 +25,9 @@ app.post("/signUp",async (req, res)=>{
     // console.log(req.body);
     const user = new User(req.body);
     try {
+        // if(req.body.skills.length > 10){
+        //     throw new Error("Too much skills passed!")
+        // }
         await user.save();
         res.send("Succesfully added user");  
     } catch (error) {
@@ -73,7 +76,7 @@ app.delete("user", async (req, res)=>{
             res.send("Deleted the user succcessfully!")
         }
     } catch (err) {
-        res.status(500).send("Something went wrong!")
+        res.status(500).send("User Not Added: "+err.message)
     }
 }) 
 
