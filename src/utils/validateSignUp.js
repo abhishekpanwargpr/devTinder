@@ -11,5 +11,4 @@ const validateSignUp = (req)=>{
         throw new Error("Maximum character limit exceeded")
     }
 }
-
 module.exports = {validateSignUp}

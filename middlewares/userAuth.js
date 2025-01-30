@@ -1,12 +1,22 @@
-const userAuth = (req, res, next)=>{
-    const token = "abp";
-    const isAuthAdmin = token === "abp";
+const jwt = require('jsonwebtoken')
+const User = require('../src/models/user')
+const userAuth = async (req, res, next)=>{
+    try {
+        const {token} = req.cookies;
+        if(!token){
+            throw new Error("Token expired")
+        }
+        const decodedData = await jwt.verify(token, "Devop@Namaste123");
+        const {_id} = decodedData;
 
-    if(!isAuthAdmin){
-        res.status(401).send("User unauthorised access")
-    }
-    else{
+        const user = await User.findById(_id);
+        if(!user){
+            throw new Error("User authentication failed")
+        }
+        req.user = user;
         next();
+    } catch (err) {
+        res.send("Error: "+err.message)
     }
 }
 module.exports = {userAuth}
