@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "This is a default description for given schema"
     },
-    photourl : {
+    photoUrl : {
         type: String,
         default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
         validate(val){
@@ -76,6 +76,7 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true
 })
+userSchema.index({firstName: 1, lastName: 1})
 userSchema.methods.getJWT = async function (){
     const userId = this._id;
     const token = await jwt.sign({_id: userId}, "Devop@Namaste123");
