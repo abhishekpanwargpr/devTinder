@@ -34,11 +34,46 @@ requestRoute.post("/request/send/:status/:toUserId", userAuth, async (req, res)=
         const request = new connectionRequest({fromUserId, toUserId, status});
         const data = await request.save();
         res.json({
-            message: "Connection request added successfully",
+            message: `${user.firstName} sent a ${status} connection request to ${toUser.firstName}`,
             data
         })
     } catch(err){
         res.status(400).send("Error: "+err.message)
+    }
+})
+requestRoute.post("/request/review/:status/:requestId", userAuth, async (req, res)=>{
+    try {
+        const toUser = req.user;
+        const fromUserId = req.params.requestId;
+        const toUserId = toUser._id;
+        const status = req.params.status;
+
+        const validStatus = ["accepted", "rejected"];
+        if(!validStatus.includes(status)){
+            res.status(400).json(
+                {message: "Status not valid!"}
+            )
+        }
+
+        const connectionRequestDb = await connectionRequest.findOne({
+            fromUserId: fromUserId,
+            toUserId: toUserId,
+            status: "interested",
+        })
+        if(!connectionRequestDb){
+            res.status(404).json(
+                {message: "Connection Request not found!"}
+            )
+        }
+
+        connectionRequestDb.status = status;
+        const data = await connectionRequestDb.save();
+        res.json({
+            message: "Connection request "+status+" succesfully!",
+            data
+        })
+    } catch(err) {
+        res.status(500).send("Error: "+err.message)
     }
 })
 module.exports = requestRoute
