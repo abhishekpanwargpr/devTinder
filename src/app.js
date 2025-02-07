@@ -7,6 +7,7 @@ const profileRouter = require('./routes/profile')
 const requestRouter = require('./routes/request')
 const validator = require('./utils/validateSignUp')
 const { userRoute } = require('./routes/user')
+const cors = require('cors')
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
@@ -19,6 +20,10 @@ connectDb()
 
 app.use("/", express.json());
 app.use(cookieParser());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 
 app.use("/", authRouter);
 app.use("/", profileRouter)

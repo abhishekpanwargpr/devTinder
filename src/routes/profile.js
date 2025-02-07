@@ -8,7 +8,9 @@ const bcrypt = require('bcrypt')
 profileRoute.get("/profile/view", userAuth, (req, res)=>{
     try {
         const user = req.user;
-        res.send(user);
+        res.json({
+            data: user
+        });
     } catch (err) {
         res.send("Error: "+err.message)
     } 

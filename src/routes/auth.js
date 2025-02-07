@@ -27,17 +27,22 @@ authRouter.post("/login", async (req, res)=>{
         throw new Error("Invalid email entered");
         }
         const user = await User.findOne({emailId: emailId});
+        if(!user){
+            throw new Error("User not found!")
+        }
         const isValidPassword = await user.validatePassword(password)
         if(isValidPassword){
             const token = await user.getJWT();
             res.cookie("token", token);
-            res.send("Login successfull");
+            res.json({
+                data: user
+            })
         }
         else{
             throw new Error("Password not matched")
         }
     } catch (err) {
-        res.status(500).send("Error: "+err.message)
+        res.status(400).send("Error: "+err.message)
     }   
 })
 

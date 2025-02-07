@@ -43,13 +43,38 @@ userRoute.get("/user/connections", userAuth, async (req, res)=>{
 userRoute.get("/user/feed", userAuth, async(req, res)=>{
     try {
         const loggedInUser = req.user;
-        const allUsers = await User.find({});
-        const filteredUsers = allUsers.map(user=>user._id !== loggedInUser._id)
+        const page = parseInt(req.query.page)||1;
+        const limit = parseInt(req.query.limit)||10;
+
+        let skip = (page-1)*limit;
+        skip = skip>50 ? 50:skip;
+        
+        const connections = await connectionRequest.find({
+            $or:[
+                {fromUserId: loggedInUser._id},
+                {toUserId: loggedInUser._id}
+            ]
+        }).select("fromUserId toUserId");
+        const hiddenUsers = new Set();
+        connections.forEach((user)=>{
+            hiddenUsers.add(user.toUserId.toString());
+            hiddenUsers.add(user.fromUserId.toString());
+        })
+        
+        const feedUsers = await User.find({
+            $and: [
+                {_id: {$nin: Array.from(hiddenUsers)}},
+                {_id: {$ne: loggedInUser._id}}
+            ]
+        }).select(SAFE_DATA)
+          .skip(skip)
+          .limit(limit)
+
         res.json({
-            data: filteredUsers
+            data: feedUsers
         })
     } catch (err) {
-        res.status(400).send("Error: "+err.message)
+        res.status(400).json({message: err.message});
     }
 })
 module.exports = {userRoute};
