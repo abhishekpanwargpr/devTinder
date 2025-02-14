@@ -11,8 +11,9 @@ const userSchema = new mongoose.Schema({
     },
     lastName: {
         type: String,
+        required: [true, 'Required field, cannot be empty'],
         minLength: 4,
-        maxLength: 50
+        maxLength: 50,
     },
     emailId: {
         type: String,
@@ -53,7 +54,7 @@ const userSchema = new mongoose.Schema({
     },
     about: {
         type: String,
-        default: "This is a default description for given schema"
+        default: "This is a default about for a profile."
     },
     photoUrl : {
         type: String,
@@ -79,7 +80,7 @@ const userSchema = new mongoose.Schema({
 userSchema.index({firstName: 1, lastName: 1})
 userSchema.methods.getJWT = async function (){
     const userId = this._id;
-    const token = await jwt.sign({_id: userId}, "Devop@Namaste123");
+    const token = await jwt.sign({_id: userId}, process.env.SECRET_KEY);
     return token
 }
 
@@ -90,4 +91,4 @@ userSchema.methods.validatePassword = async function(password){
 }
 
 const User = mongoose.model("User", userSchema);
-module.exports = User
+module.exports = User;
