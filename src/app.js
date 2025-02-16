@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express')
 const app = express()
 const connectDb = require("./configs/database")
@@ -8,7 +9,6 @@ const requestRouter = require('./routes/request')
 const validator = require('./utils/validateSignUp')
 const { userRoute } = require('./routes/user')
 const cors = require('cors')
-require('dotenv').config();
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
