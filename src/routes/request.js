@@ -34,8 +34,9 @@ requestRoute.post("/request/send/:status/:toUserId", userAuth, async (req, res)=
 
         const request = new connectionRequest({fromUserId, toUserId, status});
         const data = await request.save();
-        const emailRes = await run(`${user.firstName} ${user.lastName} sent a ${status} connection request to ${toUser.firstName} ${toUser.lastName}`);
-        console.log(emailRes);
+        const emailRes = await run(`${user.firstName} ${user.lastName} sent a ${status} connection request to ${toUser.firstName} ${toUser.lastName}`, 
+            "A new connection request was sent on your website!"
+        );
         res.json({
             message: `${user.firstName} sent a ${status} connection request to ${toUser.firstName}`,
             data

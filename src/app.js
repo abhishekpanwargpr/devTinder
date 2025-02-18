@@ -9,6 +9,7 @@ const requestRouter = require('./routes/request')
 const validator = require('./utils/validateSignUp')
 const { userRoute } = require('./routes/user')
 const cors = require('cors')
+require('./utils/cronJobs');
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
