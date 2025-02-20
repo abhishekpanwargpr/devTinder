@@ -9,11 +9,15 @@ const requestRouter = require('./routes/request')
 const validator = require('./utils/validateSignUp')
 const { userRoute } = require('./routes/user')
 const cors = require('cors')
+const http = require('http');
 require('./utils/cronJobs');
+const server = http.createServer(app);
+const {initializeSocket} = require('./utils/intializeSocket') 
+initializeSocket(server);
 connectDb()
     .then(()=>{
         console.log("Database connection established...")
-        app.listen(process.env.PORT, ()=>{
+        server.listen(process.env.PORT, ()=>{
         console.log("Server listening on port 7777")
     })})
     .catch((err)=>{
@@ -26,7 +30,6 @@ app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
-
 app.use("/", authRouter);
 app.use("/", profileRouter)
 app.use("/", requestRouter);
