@@ -1,4 +1,5 @@
-const socket = require('socket.io')
+const socket = require('socket.io');
+const chatModel = require('../models/chat');
 const initializeSocket = (server)=>{
     const io = socket(server, {
         cors: {
@@ -7,15 +8,28 @@ const initializeSocket = (server)=>{
     })
 
     io.on("connection",(socket)=>{
-        socket.on("joinChat",({firstName, userId, targetUserId})=>{
+        socket.on("joinChat",({userId, targetUserId})=>{
             const roomId = [userId, targetUserId].sort().join("_");
             socket.join(roomId);
         });
 
-        socket.on("sendMessage", ({firstName, userId, targetUserId, text})=>{
+        socket.on("sendMessage", async({firstName, userId, targetUserId, text})=>{
             const roomId = [userId, targetUserId].sort().join("_");
-            console.log(firstName + " sent message: "+text);
             io.to(roomId).emit("messageReceived", {firstName, text})
+            try {
+                let chat = await chatModel.findOne({
+                    participants: {$all: [userId, targetUserId]}
+                })
+                if(!chat){
+                    chat = new chatModel({participants: [userId, targetUserId],
+                        messages: []
+                    })
+                }
+                chat.messages.push({sender: userId, text})
+                await chat.save();
+            } catch (err) {
+                console.error("Error: "+err)
+            }
         });
         
         socket.on("disconnect", ()=>{
